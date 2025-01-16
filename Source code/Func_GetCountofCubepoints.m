@@ -1,0 +1,10 @@
+function [count]=Func_GetCountofCubepoints(TravesalCubenum,Cub_num,step_num3,CubePoints)
+       num_3 = TravesalCubenum;
+       num_2 = num_3 + step_num3;
+       num_7 = num_3 + Cub_num;  
+       num_6 = num_3 + Cub_num + step_num3;
+       num_0 = num_3 + 1;
+       num_1 = num_3 + step_num3 + 1;
+       num_4 = num_3 + Cub_num + 1;
+       num_5 = num_3 + Cub_num + step_num3 + 1;
+       count = CubePoints(num_0, 5) + CubePoints(num_1, 5) + CubePoints(num_2, 5) + CubePoints(num_3, 5) + CubePoints(num_4, 5) + CubePoints(num_5, 5) + CubePoints(num_6, 5) + CubePoints(num_7, 5);
