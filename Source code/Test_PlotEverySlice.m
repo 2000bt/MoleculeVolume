@@ -1,8 +1,8 @@
 close all;
 clear;
 clc;
-strFile='C:\Users\赵亮\Desktop\GraStuCor\EecMolCloud\小论文\zl的日常\Molecule\cat6.dst';
-strFile1='C:\Users\赵亮\Desktop\GraStuCor\EecMolCloud\小论文\zl的日常\Molecule\subr2.dst';
+strFile='';
+strFile1='';
 
 tic;
 [ Atom_info,AtomNum, ElecCloudDenNum, CubePoints, step_num, step, org_coor ] = Func_GetCubePoints( strFile );
@@ -22,7 +22,7 @@ step_num1_3=step_num1(3);
 tic;
 [vX,vY,vZ,vFace]=Func_GetAllBoundaries_And_Interpolation(CubePoints, step_num_1, step_num_2, step_num_3, LUT);
 [vX1,vY1,vZ1,vFace1]=Func_GetAllBoundaries_And_Interpolation(CubePoints1, step_num1_1, step_num1_2, step_num1_3, LUT);
-vX1=vX1+10; 
+vX1=vX1; 
 time2=toc;
 fprintf('代码段2执行时间: %f 秒\n', time2);
 
@@ -71,6 +71,6 @@ vX1=vX3;
 vY1=vY3;
 vZ1=vZ3;
 tic;
-[vXtemp,vYtemp,vXtemp1,vYtemp1]=Func_PlotEverySlice(vX1, vY1, vZ1, iFaceLength1, vFace1,step1,vStart1,vX, vY, vZ, iFaceLength, vFace,step);
+[vXtemp,vYtemp,vXtemp1,vYtemp1,mLine,mLine1,vContourPoint,vContourPoint1,iCountContour,iCountContour1,totalVolume]=Func_PlotEverySlice(vX1, vY1, vZ1, iFaceLength1, vFace1,step1,vStart1,vX, vY, vZ, iFaceLength, vFace,step);
 time3=toc;
 fprintf('代码段3执行时间: %f 秒\n', time3);

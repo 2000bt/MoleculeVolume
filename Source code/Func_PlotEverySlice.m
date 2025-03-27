@@ -1,11 +1,11 @@
-function[vXtemp,vYtemp,vXtemp1,vYtemp1,mLine,mLine1,vContourPoint,vContourPoint1,iCountContour,iCountContour1]= Func_PlotEverySlice (vX, vY, vZ, iFaceLength, vFace,step,vStart,vX1, vY1, vZ1, iFaceLength1, vFace1,step1)
+function[vXtemp,vYtemp,vXtemp1,vYtemp1,mLine,mLine1,vContourPoint,vContourPoint1,iCountContour,iCountContour1,totalVolume]= Func_PlotEverySlice(vX, vY, vZ, iFaceLength, vFace,step,vStart,vX1, vY1, vZ1, iFaceLength1, vFace1,step1)
 %matX每一列代表一层点的的横坐标，有多少列就有多少层
 % close all
 % tic
 % for iii=1:6
 % FontSize = 30; 
 % FontWeight = 'bold';
-
+totalVolume=0;
 %估计大概有多少层以及起始以及最终层
 % dSlice=step1(1);
 dSlice=(step(1)+step1(1))/2;               
@@ -329,9 +329,9 @@ for j = 1:iLayer11
 
     % 绘制当前点集
     %hold on;  % 保持当前图像
-    plot(vXY(:, 1), vXY(:, 2), '.', 'Color', [0.2196, 0.3490, 0.5373],'MarkerSize', 10); % 使用蓝色点绘制
+    plot(vXY(:, 1), vXY(:, 2), '.', 'Color', [0.2196, 0.3490, 0.5373],'MarkerSize', 8); % 使用蓝色点绘制
     hold on;
-    plot(vXY1(:, 1), vXY1(:, 2),'.', 'Color', [0.74,0.12,0.12],'MarkerSize', 10); % 使用红色点绘制
+    plot(vXY1(:, 1), vXY1(:, 2),'.', 'Color', [0.74,0.12,0.12],'MarkerSize', 8); % 使用红色点绘制
     %set(gca,'LooseInset',get(gca,'TightInset'))
     hold off;
 %     view(3)
@@ -454,7 +454,7 @@ print(gcf,'filename','-dpdf','-r0')
         contour = contourCoords(sum(pointsPerContour(1:i-1)) + 1 : sum(pointsPerContour(1:i)), :);
         
         % 绘制轮廓点集（蓝色点）
-        plot(contour(:,1), contour(:,2), '.', 'Color', [0.2196, 0.3490, 0.5373],'MarkerSize', 10);
+        plot(contour(:,1), contour(:,2), '.', 'Color', [0.2196, 0.3490, 0.5373],'MarkerSize', 8);
         hold on;
         
         % 计算当前轮廓的包围盒
@@ -473,7 +473,7 @@ print(gcf,'filename','-dpdf','-r0')
         contour1 = contourCoords1(sum(pointsPerContour1(1:i-1)) + 1 : sum(pointsPerContour1(1:i)), :);
         
         % 绘制轮廓点集（红色点）
-        plot(contour1(:,1), contour1(:,2),'.', 'Color', [0.74,0.12,0.12],'MarkerSize', 10);
+        plot(contour1(:,1), contour1(:,2),'.', 'Color', [0.74,0.12,0.12],'MarkerSize', 8);
         hold on;
         
         % 计算当前轮廓的包围盒
@@ -529,12 +529,12 @@ hold on;
 
 % 绘制第一组有效点（蓝色）
 if ~isempty(validContourCoords)&&~isempty(validContourCoords1)
-    plot(validContourCoords(:,1), validContourCoords(:,2),  '.', 'Color', [0.2196, 0.3490, 0.5373],'MarkerSize', 10); 
+    plot(validContourCoords(:,1), validContourCoords(:,2),  '.', 'Color', [0.2196, 0.3490, 0.5373],'MarkerSize', 8); 
 % end
 % 
 % 绘制第二组有效点（红色）
 % if ~isempty(validContourCoords1)
-    plot(validContourCoords1(:,1), validContourCoords1(:,2), '.', 'Color', [0.74,0.12,0.12],'MarkerSize', 10); % 使用红色点绘制
+    plot(validContourCoords1(:,1), validContourCoords1(:,2), '.', 'Color', [0.74,0.12,0.12],'MarkerSize', 8); % 使用红色点绘制
 
 % end
 
@@ -583,13 +583,13 @@ hold on;
 
 % 绘制第一组有效点（蓝色）
 if ~isempty(RvalidContourCoords)
-    plot(RvalidContourCoords(:,1), RvalidContourCoords(:,2), '.', 'Color', [0.2196, 0.3490, 0.5373],'MarkerSize', 10); % 使用蓝色点绘制
+    plot(RvalidContourCoords(:,1), RvalidContourCoords(:,2), '.', 'Color', [0.2196, 0.3490, 0.5373],'MarkerSize', 8); % 使用蓝色点绘制
 
 end
 
 % 绘制第二组有效点（红色）
 if ~isempty(RvalidContourCoords1)
-    plot(RvalidContourCoords1(:,1), RvalidContourCoords1(:,2), '.', 'Color', [0.74,0.12,0.12],'MarkerSize', 10); % 使用红色点绘制
+    plot(RvalidContourCoords1(:,1), RvalidContourCoords1(:,2), '.', 'Color', [0.74,0.12,0.12],'MarkerSize', 8); % 使用红色点绘制
 
 end
 
@@ -670,6 +670,19 @@ for i = 1:numContours
     currentX = vXtempL(currentContour);
     currentY = vYtempL(currentContour);
 
+    % 高斯面积公式计算轮廓面积
+    x_shifted = [currentX(2:end); currentX(1)]; % x_{i+1}
+    y_shifted = [currentY(2:end); currentY(1)]; % y_{i+1}
+    
+    area = 0.5 * abs(sum(currentX .* y_shifted - x_shifted .* currentY)); 
+    disp(size(currentX));  % 应该是 (N,1) 或 (1,N)
+    disp(size(currentY));  % 应该是 (N,1) 或 (1,N)
+    disp(size(area));      % 应该是 (1,1)
+
+    % 累计体积
+    totalVolume = totalVolume + area * dSlice;
+    disp(totalVolume)
+
     % 闭合轮廓，连接起始点
     currentX = [currentX; currentX(1)];
     currentY = [currentY; currentY(1)];
@@ -701,7 +714,7 @@ axis([xMin2, xMax2, yMin2, yMax2]);
 xlabel('X/Bohr','FontSize', 14);
 ylabel('Y/Bohr','FontSize', 14);
 box on;
- set(gcf,'Units','Inches');
+set(gcf,'Units','Inches');
 pos = get(gcf,'Position');
 set(gcf,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
 print(gcf,'filename','-dpdf','-r0')
