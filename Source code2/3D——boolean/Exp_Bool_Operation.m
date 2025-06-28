@@ -1,0 +1,405 @@
+function [dVol,num_delete]= Exp_Bool_Operation(vX, vY, vZ,  vFace,AtomNum,Atom_info,vX1, vY1, vZ1, vFace1,AtomNum1,Atom_info1)
+%% 包围盒筛除一部分
+tic
+num_delete=zeros(1,6);
+% [vIdx,vIdx1]=Func_AABB_Sphere(vX, vY, vZ, iFaceLength, vFace,vX1, vY1, vZ1,iFaceLength1, vFace1);
+% toc
+% figure;
+% hold on;
+[vIdx,vIdx1,num]=Func_BoundingBox(vX, vY, vZ,  vFace,AtomNum,Atom_info,vX1, vY1, vZ1, vFace1,AtomNum1,Atom_info1);
+% [vIdx1,iCount1]=Func_BoundingBox(vX1, vY1, vZ1, iFaceLength1, vFace1,vX, vY, vZ);
+num_delete(1,1:4)=num(1,1:4);
+toc
+%%
+% 创建Surface3和Surface4
+Surface3 = createSurface(vX, vY, vZ, vFace, vIdx);
+Surface4 = createSurface(vX1, vY1, vZ1, vFace1, vIdx1);
+
+% 去重顶点
+[~, ia, ic] = unique(Surface3.vertices, 'rows');
+Surface3.vertices = Surface3.vertices(ia, :);
+Surface3.faces = ic(Surface3.faces);
+
+[~, ia, ic] = unique(Surface4.vertices, 'rows');
+Surface4.vertices = Surface4.vertices(ia, :);
+Surface4.faces = ic(Surface4.faces);
+
+%%
+figure;
+hold on;
+S=Surface3; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor', [0.8235,0.1255,0.1529], 'FaceAlpha', 0.5, 'FaceColor',  [0.99216,0.96078,0.90196]);
+S=Surface4; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor', [0.2196,0.3490,0.5373], 'FaceAlpha', 0.5, 'FaceColor',  [0.99216,0.96078,0.90196]);
+% hold off;
+axis off;
+axis image;
+%%
+% figure;
+% hold on;
+[inter_face,Surf] = SurfaceIntersection(Surface3,Surface4);
+% S=Surf; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor', 'g','LineWidth', 2,  'FaceColor', 'r');
+% hold off;
+toc
+% intersect_matrix=full(inter_face);
+% [idxx,idxy]=find(intersect_matrix);
+% num_idxx=length(idxx);
+%%
+% figure;
+% hold on;
+% S=Surface3; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor', [0.5,0.5,0.5], 'FaceAlpha', 0.5, 'FaceColor', 'b');
+% S=Surf; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor', 'r','LineWidth', 2,  'FaceColor', 'r');
+% faces = [
+%     1 2 3;   % 第一个三角形（对应 vertices 的第1-3行）
+% ];
+% colors = [
+%     0 1 0;   % 红色（第一个三角形）
+% ];
+% for pp=1:num_idxx
+%     tri_faces = [
+%     Surface3.faces(idxx(pp), :);   % 从 Surface 提取第一个三角形的面片索引
+%     
+% ];
+% vertices = [
+%     Surface3.vertices(tri_faces(1, :), :);  % 提取 Surface 对应三角形的顶点
+%   
+% ];
+%      patch('Faces', faces, 'Vertices', vertices, ...
+%       'FaceVertexCData', colors, 'FaceColor', 'flat', ...
+%       'EdgeColor', 'k', 'LineWidth', 1);
+% end
+% hold off;
+% figure;
+% hold on;
+% S=Surface4; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor',[0.5,0.5,0.5], 'FaceAlpha', 0.5, 'FaceColor', 'b');
+% S=Surf; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor', 'r','LineWidth', 2,  'FaceColor', 'r');
+% faces = [
+%     1 2 3;   % 第一个三角形（对应 vertices 的第1-3行）
+% ];
+colors = [
+    [0.149, 0.596, 0.313];   % 红色（第一个三角形）
+];
+% for pp=1:num_idxx
+%     tri_faces = [
+%     Surface4.faces(idxy(pp), :);   % 从 Surface 提取第一个三角形的面片索引
+%     
+% ];
+% vertices = [
+%     Surface4.vertices(tri_faces(1, :), :);  % 提取 Surface 对应三角形的顶点
+%   
+% ];
+%      patch('Faces', faces, 'Vertices', vertices, ...
+%       'FaceVertexCData', colors, 'FaceColor', 'flat', ...
+%       'EdgeColor', 'k', 'LineWidth', 1);
+% end
+% hold off;
+%%
+intersect_matrix=full(inter_face);
+[idxx,idxy]=find(intersect_matrix);
+num_idxx=length(idxx);
+% figure;
+hold on;
+faces = [
+    1 2 3;   % 第一个三角形（对应 vertices 的第1-3行）
+    4 5 6;   % 第二个三角形（对应 vertices 的第4-6行）
+];
+colors1= [
+%    [0.8235,0.1255,0.1529];   % 红色（第一个三角形）
+%    [0.2196,0.3490,0.5373];   % 蓝色（第二个三角形）
+[0.149, 0.596, 0.313];
+[0.149, 0.596, 0.313];
+];
+for pp=1:num_idxx
+    tri_faces = [
+    Surface3.faces(idxx(pp), :);   % 从 Surface 提取第一个三角形的面片索引
+    Surface4.faces(idxy(pp), :)   % 从 Surface1 提取第一个三角形的面片索引
+];
+vertices = [
+    Surface3.vertices(tri_faces(1, :), :);  % 提取 Surface 对应三角形的顶点
+    Surface4.vertices(tri_faces(2, :), :)  % 提取 Surface1 对应三角形的顶点
+];
+     patch('Faces', faces, 'Vertices', vertices, ...
+      'FaceVertexCData', colors1, 'FaceColor', 'flat', ...
+      'EdgeColor', 'k', 'LineWidth', 1);
+end
+hold off;
+axis off;
+axis image;
+%%
+%重新三角化
+pair_tri=Surf.triangles;
+len_tri=length(pair_tri);
+used_tri_face1=false(len_tri,1);
+used_tri_face2=false(len_tri,1);
+N_change={};
+for pp=1:len_tri
+% for pp=8:8
+    if(used_tri_face1(pp))
+        continue;
+    end
+    temp_tri = pair_tri(pp, 1);
+    
+    % 直接获取三角形的所有顶点
+    tri_idx = Surface3.faces(temp_tri, :);  % 获取三角形的顶点索引
+    %去除原三角面片
+  %  Surface.faces(temp_tri,:)=[];
+    Points_tri = Surface3.vertices(tri_idx, :);      % 获取对应的顶点坐标
+%     figure;
+%     hold on;
+  %纠正顶点方向
+    [N_temp,~]=Func_PlotNorvec(Points_tri,0,false);
+%     hold off;
+    %
+    idx_tri=find(pair_tri(:,1)==temp_tri);
+    used_tri_face1(idx_tri)=true;
+    %len_temp=length(idx_tri);
+    temp_mat = unique(reshape(Surf.edges(idx_tri, :), [], 1));
+    temp_cor=Surf.vertices(temp_mat,:);
+   
+    Points_tri=[Points_tri;temp_cor];
+    
+    original_vertex_count=size(Surface3.vertices,1);
+    Surface3.vertices=[Surface3.vertices;temp_cor];
+%     figure;
+%     hold on;
+    %投影
+    tri=Func_Desect_triangle(Points_tri);
+    for ppp=1:length(tri)
+        [NN,flags]=Func_PlotNorvec([Points_tri(tri(ppp,1),:);Points_tri(tri(ppp,2),:);Points_tri(tri(ppp,3),:)],N_temp(1,3),true);
+        N_temp=[N_temp;NN];
+        if(flags)
+            %更换顶点顺序
+            [tri(ppp,2), tri(ppp,3)] = deal(tri(ppp,3), tri(ppp,2));
+        end
+    end
+    N_change{end+1,1} = N_temp;
+
+    %加入新三角面片
+    tri(tri == 1) = tri_idx(1);  % 将矩阵 A 中的 1 替换为 tri(1)
+    tri(tri == 2) = tri_idx(2);  % 将矩阵 A 中的 2 替换为 tri(2)
+    tri(tri == 3) = tri_idx(3);  % 将矩阵 A 中的 3 替换为 tri(3)
+  
+% 对其他元素加上原顶点数量
+    tri(~ismember(tri, tri_idx)) = tri(~ismember(tri, tri_idx)) + original_vertex_count-3;
+    Surface3.faces=[Surface3.faces;tri];
+    
+end
+%%
+%去重
+idxx_unique = unique(idxx);
+length_idxx_un=length(idxx_unique);
+Surface3.faces(idxx_unique,:)=[];
+[~,ia,ic] = unique(Surface3.vertices,'rows'); % V = P(ia,:) and P = V(ic,:).
+Surface3.vertices = Surface3.vertices(ia,:);
+Surface3.faces = ic(Surface3.faces);
+N_change1={};
+for qq=1:len_tri
+    if(used_tri_face2(qq))
+        continue;
+    end
+    temp_tri = pair_tri(qq, 2);
+    % 直接获取三角形的所有顶点
+    tri_idx = Surface4.faces(temp_tri, :);  % 获取三角形的顶点索引
+  
+    Points_tri = Surface4.vertices(tri_idx, :);      % 获取对应的顶点坐标
+    [N_temp,~]=Func_PlotNorvec(Points_tri,0,false);
+    
+    idx_tri=find(pair_tri(:,2)==temp_tri);
+    used_tri_face2(idx_tri)=true;
+    %len_temp=length(idx_tri);
+    temp_mat = unique(reshape(Surf.edges(idx_tri, :), [], 1));
+    temp_cor=Surf.vertices(temp_mat,:);
+   %顶点去重合并
+    Points_tri=[Points_tri;temp_cor];
+     
+    original_vertex_count=size(Surface4.vertices,1);
+    Surface4.vertices=[Surface4.vertices;temp_cor];
+    %投影
+    tri=Func_Desect_triangle(Points_tri);
+    for ppp=1:length(tri)
+        [NN,flags]=Func_PlotNorvec([Points_tri(tri(ppp,1),:);Points_tri(tri(ppp,2),:);Points_tri(tri(ppp,3),:)],N_temp(1,3),true);
+        N_temp=[N_temp;NN];
+        if(flags)
+            %更换顶点顺序
+            [tri(ppp,2), tri(ppp,3)] = deal(tri(ppp,3), tri(ppp,2));
+        end
+    end
+    N_change1{end+1,1} = N_temp;
+    %加入新三角面片
+    tri(tri == 1) = tri_idx(1);  % 将矩阵 A 中的 1 替换为 tri(1)
+    tri(tri == 2) = tri_idx(2);  % 将矩阵 A 中的 2 替换为 tri(2)
+    tri(tri == 3) = tri_idx(3);  % 将矩阵 A 中的 3 替换为 tri(3)
+  
+% 对其他元素加上原顶点数量
+    tri(~ismember(tri, tri_idx)) = tri(~ismember(tri, tri_idx)) + original_vertex_count-3;
+    Surface4.faces=[Surface4.faces;tri];
+    
+end
+idxy_unique = unique(idxy);
+%Surface2=Surface;
+length_idxy_un=length(idxy_unique);
+Surface4.faces(idxy_unique,:)=[];
+[~,ia,ic] = unique(Surface4.vertices,'rows'); % V = P(ia,:) and P = V(ic,:).
+Surface4.vertices = Surface4.vertices(ia,:);
+Surface4.faces = ic(Surface4.faces);
+%%
+%去除退化
+Surface3=Func_ExcluDegrada(Surface3);
+Surface4=Func_ExcluDegrada(Surface4);
+%%
+figure;
+hold on;
+% S=Surface3; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor', [0.5,0.5,0.5], 'FaceAlpha', 0.5, 'FaceColor', 'b');
+% 
+% patch('Faces', Surface3.faces(length(vIdx)-length_idxx_un:end, :), 'Vertices', Surface3.vertices, ...
+%     'FaceVertexCData', colors, 'FaceColor', 'flat', ...
+%     'EdgeColor', 'k', 'LineWidth', 1);
+% S=Surf; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor', 'r','LineWidth', 2,  'FaceColor', 'r');
+% hold off;
+% figure;
+% hold on;
+S=Surface3; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor', [0.8235,0.1255,0.1529], 'FaceAlpha', 0.5, 'FaceColor', [0.99216,0.96078,0.90196]);
+% 
+patch('Faces', Surface3.faces(length(vIdx)-length_idxx_un:end, :), 'Vertices', Surface3.vertices, ...
+    'FaceVertexCData', [1,0,0], 'FaceColor', 'flat', ...
+    'EdgeColor', 'k', 'LineWidth', 1);
+
+% hold off;
+
+
+% figure;
+% hold on;
+S=Surface4; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor',[0.2196,0.3490,0.5373], 'FaceAlpha', 0.5, 'FaceColor',  [0.99216,0.96078,0.90196]);
+patch('Faces', Surface4.faces(length(vIdx1)-length_idxy_un:end, :), 'Vertices', Surface4.vertices, ...
+    'FaceVertexCData', [0,0,1], 'FaceColor', 'flat', ...
+    'EdgeColor', 'k', 'LineWidth', 1);
+% S=Surf; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor', 'r','LineWidth', 2,  'FaceColor', 'r');
+% hold off;
+% 
+% figure;
+% hold on;
+% S=Surface4; trisurf(S.faces, S.vertices(:,1),S.vertices(:,2),S.vertices(:,3),'EdgeColor', [0.5,0.5,0.5], 'FaceAlpha', 0.5, 'FaceColor', 'b');
+% patch('Faces', Surface4.faces(length(vIdx1)-length_idxy_un:end, :), 'Vertices', Surface4.vertices, ...
+%     'FaceVertexCData', colors, 'FaceColor', 'flat', ...
+%     'EdgeColor', 'k', 'LineWidth', 1);
+% hold off;
+axis off;
+axis image;
+%%
+%内外关系判断
+
+[vIdx_interface2,iCount4]=Func_ExInrelation1(Surface3,vX1,vY1,vZ1,vFace1);
+[vIdx_interface1,iCount3]=Func_ExInrelation1(Surface4,vX,vY,vZ,vFace);
+
+%% 
+figure;
+hold on;
+% patch('Faces', Surface4.faces(vIdx_interface1,:), 'Vertices', Surface4.vertices, ...
+%     'FaceVertexCData',  [0.99216,0.96078,0.90196], 'FaceColor', 'flat', ...
+%     'EdgeColor',[0.2196,0.3490,0.5373], 'LineWidth', 1);
+% % figure;
+% patch('Faces', Surface3.faces(vIdx_interface2,:), 'Vertices', Surface3.vertices, ...
+%     'FaceVertexCData',  [0.99216,0.96078,0.90196], 'FaceColor', 'flat', ...
+%     'EdgeColor', [0.8235,0.1255,0.1529], 'LineWidth', 1);
+% hold off;
+% axis image;
+% % axis off;
+% vFace=Surface1.faces;
+% vX=Surface1.vertices(:,1);
+% vY=Surface1.vertices(:,2);
+% vZ=Surface1.vertices(:,3);
+% mNormal = zeros(length(vFace), 4);
+% for i = 1 : length(vFace)
+%    dX1 = vX(vFace(i, 1));
+%    dX2 = vX(vFace(i, 2));
+%    dX3 = vX(vFace(i, 3));
+%    
+%    dY1 = vY(vFace(i, 1));
+%    dY2 = vY(vFace(i, 2));
+%    dY3 = vY(vFace(i, 3));
+%    
+%    dZ1 = vZ(vFace(i, 1));
+%    dZ2 = vZ(vFace(i, 2));
+%    dZ3 = vZ(vFace(i, 3));
+%    
+%    mNormal(i, 1) = (dY2 - dY1) * (dZ3 - dZ1) - (dZ2 - dZ1) * (dY3 - dY1);
+%    mNormal(i, 2) = (dZ2 - dZ1) * (dX3 - dX1) - (dX2 - dX1) * (dZ3 - dZ1);
+%    mNormal(i, 3) = (dX2 - dX1) * (dY3 - dY1) - (dY2 - dY1) * (dX3 - dX1);
+%    mNormal(i, 4) = 0 - (mNormal(i, 1) * dX1 + mNormal(i, 2) * dY1 + mNormal(i, 3) * dZ1);
+% end
+% for i =1 : 120
+%     dX1 = vX(vFace(i, 1));
+%     dX2 = vX(vFace(i, 2));
+%     dX3 = vX(vFace(i, 3));
+%     dY1 = vY(vFace(i, 1));
+%     dY2 = vY(vFace(i, 2));
+%     dY3 = vY(vFace(i, 3));
+%     dZ1 = vZ(vFace(i, 1));
+%     dZ2 = vZ(vFace(i, 2));
+%     dZ3 = vZ(vFace(i, 3));
+%     dX4 = (dX1 + dX2 + dX3) / 3;
+%     dY4 = (dY1 + dY2 + dY3) / 3;
+%     dZ4 = (dZ1 + dZ2 + dZ3) / 3;
+%     line( [ dX1; dX2 ], [ dY1; dY2 ], [ dZ1; dZ2 ], 'LineWidth', 2, 'Color', [0.375, 0.375, 0.375] );
+%     line( [ dX2; dX3 ], [ dY2; dY3 ], [ dZ2; dZ3 ], 'LineWidth', 2, 'Color', [0.375, 0.375, 0.375] );
+%     line( [ dX3; dX1 ], [ dY3; dY1 ], [ dZ3; dZ1 ], 'LineWidth', 2, 'Color', [0.375, 0.375, 0.375] );
+%     h = quiver3(dX4, dY4, dZ4, mNormal(i, 1), mNormal(i, 2), mNormal(i, 3), 3);
+%     set(h,'maxheadsize',10);
+%     set(h,'LineWidth',3);
+%     hold on
+% end
+% axis image;
+% axis off;
+% for i = 140 : 220
+%     dX1 = vX(vFace(i, 1));
+%     dX2 = vX(vFace(i, 2));
+%     dX3 = vX(vFace(i, 3));
+%     dY1 = vY(vFace(i, 1));
+%     dY2 = vY(vFace(i, 2));
+%     dY3 = vY(vFace(i, 3));
+%     dZ1 = vZ(vFace(i, 1));
+%     dZ2 = vZ(vFace(i, 2));
+%     dZ3 = vZ(vFace(i, 3));
+%     dX4 = (dX1 + dX2 + dX3) / 3;
+%     dY4 = (dY1 + dY2 + dY3) / 3;
+%     dZ4 = (dZ1 + dZ2 + dZ3) / 3;
+%     line( [ dX1; dX2 ], [ dY1; dY2 ], [ dZ1; dZ2 ], 'LineWidth', 2, 'Color', [0.375, 0.375, 0.375] );
+%     line( [ dX2; dX3 ], [ dY2; dY3 ], [ dZ2; dZ3 ], 'LineWidth', 2, 'Color', [0.375, 0.375, 0.375] );
+%     line( [ dX3; dX1 ], [ dY3; dY1 ], [ dZ3; dZ1 ], 'LineWidth', 2, 'Color', [0.375, 0.375, 0.375] );
+%     h = quiver3(dX4, dY4, dZ4, mNormal(i, 1), mNormal(i, 2), mNormal(i, 3), 'LineWidth', 2);
+%     set(h,'maxheadsize',2);
+%     hold on
+% end
+
+%%
+%计算体积
+intSurface.vertices = [];
+intSurface.faces    = [];
+np = size(Surface4.vertices,1);
+intSurface.vertices = [Surface4.vertices; Surface3.vertices];
+intSurface.faces    = [Surface4.faces(vIdx_interface1,:);    Surface3.faces(vIdx_interface2,:)+np];
+dVol=Func_ComputeVolume(intSurface);
+num_delete(1,5)=length(vIdx_interface2);
+num_delete(1,6)=length(vIdx_interface1);
+% 
+% Surface4.faces=Surface4.faces(vIdx_interface1,:);
+% Surface3.faces=Surface3.faces(vIdx_interface2,:);
+% total_volume = 
+% total_volume1= Func_ComputeVolume(Surface4);
+% total_volume+total_volume1;
+% 函数化处理
+function surface = createSurface(vX, vY, vZ, vFace, vIdx)
+    len = length(vIdx);
+    surface = struct('vertices', [], 'faces', []);
+    
+    for k = 0:len-1
+        a = vIdx(k + 1);
+        % 获取面片的三个顶点坐标
+        X1 = vX(vFace(a, 1)); Y1 = vY(vFace(a, 1)); Z1 = vZ(vFace(a, 1));
+        X2 = vX(vFace(a, 2)); Y2 = vY(vFace(a, 2)); Z2 = vZ(vFace(a, 2));
+        X3 = vX(vFace(a, 3)); Y3 = vY(vFace(a, 3)); Z3 = vZ(vFace(a, 3));
+        
+        % 更新顶点和面片数据
+        surface.vertices(3*k + (1:3), :) = [X1 Y1 Z1; X2 Y2 Z2; X3 Y3 Z3];
+        surface.faces(k + 1, :) = 3*k + (1:3);
+    end
+end
+end
